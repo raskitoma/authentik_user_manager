@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  autkman:
+    build: .
+    container_name: autkman
+    hostname: autkman
+    image: autkman:v1
+    privileged: true
+    networks:
+      master_network:
+    ports:
+      - 3000:3000 # This port should match the one in the environment variable APP_PORT
+    environment:
+      - TZ=America/New_York
+      - APP_PORT=3000 # this must match the port above
+      - APP_HEALTHCHECK_URI=https://hc-ping.com/healuuid # https://hc-ping.com/ is a free service to monitor your container
+      - APP_HEALTHCHECK_INTERVAL=300 # Healtcheck in seconds.
+      - APP_DEBUG=0 # This is the debug level for the app. 0 is no debug, 1 is debug.
+      - AUTHENTIK_SERVER=http://authentik:9000/api/v3/ # This is the url to the authentik server.
+      - AUTHENTIK_TOKEN=DKDKDKDKDKD-DKDKDKDKDKDKDKD # This is the access token for authentik.
+      - AUTHENTIK_MANAGER_GROUP=ADMIN # This is the group name for managers who will control users.
+      - AUTHENTIK_NEWUSER_GROUP=New_Users # This is the source group for new users.
+      - AUTHENTIK_DESUSER_GROUP=APPROVED # This is the destination group name.
+      - AUTHENTIK_BLOCKED_GROUP=BLOCKED # This is the blocked group name.
+    cap_add:
+      - net_admin
+      - net_raw
+      - sys_nice
+    restart: always
+    oom_kill_disable: true
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m" 
+
+networks:
+  master_network:
+    external: true
